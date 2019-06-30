@@ -9,6 +9,7 @@ class ModelTests(TestCase):
         user = get_user_model().objects.create_user(
             email=email, password=password
         )
+
         self.assertTrue(user.email, email)
         self.assertTrue(user.check_password(password))
 
@@ -26,5 +27,6 @@ class ModelTests(TestCase):
     def test_user_is_super_user(self):
         user = get_user_model().objects.create_superuser(
             'admin@email.com', 'pass1234')
+
         self.assertTrue(user.is_staff)
         self.assertTrue(user.is_superuser)
