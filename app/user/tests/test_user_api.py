@@ -7,7 +7,7 @@ from rest_framework import status
 
 CREATE_USER_ROUTE = reverse('user:create')
 TOKEN_ROUTE = reverse('user:token')
-TOKEN_URL = reverse('user:token')
+ME_ROUTE = reverse('user:me')
 
 
 def create_user(**kwargs):
@@ -48,8 +48,8 @@ class UserAPITests(TestCase):
     #     payload = {'email': 'user@email.com', 'password': 'password123'}
     #     create_user(**payload)
     #     res = self.client.post(TOKEN_ROUTE, payload)
-    #     self.assertIn('token', res.data)
     #     self.assertEqual(res.status_code, status.HTTP_200_OK)
+    #     self.assertIn('token', res.data)
 
     def test_create_user_invalid_credentials(self):
         create_user(**self.payload)
@@ -68,3 +68,42 @@ class UserAPITests(TestCase):
         res = self.client.post(TOKEN_ROUTE, self.payload)
         self.assertNotIn('token', res.data)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_fetching_user_unauthorized(self):
+        res = self.client.get(ME_ROUTE)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class ProtectedRouteTests(TestCase):
+    def setUp(self):
+        self.payload = {
+            'email': 'user@email.com',
+            'password': 'password123',
+            'name': 'test user'
+        }
+        self.user = create_user(**self.payload)
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+    def test_fetch_user_successfully(self):
+        res = self.client.get(ME_ROUTE)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, {
+            'email': self.payload['email'],
+            'name': self.payload['name']
+        })
+
+    def test_post_not_allowed(self):
+        res = self.client.post(ME_ROUTE, {})
+        self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_update_user_successfully(self):
+        self.payload['name'] = 'new name'
+        self.payload['password'] = 'newpassword123'
+        del self.payload['email']
+
+        res = self.client.patch(ME_ROUTE, self.payload)
+
+        self.assertEqual(self.user.name, self.payload['name'])
+        self.assertTrue(self.user.check_password(self.payload['password']))
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
