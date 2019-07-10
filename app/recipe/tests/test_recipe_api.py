@@ -90,3 +90,49 @@ class PrivateRecipeApiTests(TestCase):
 
         serializer = RecipeDetailSerializer(recipe)
         self.assertEqual(res.data, serializer.data)
+
+    def test_create_basic_recipe(self):
+        payload = {
+            'title': 'Sample recipe title',
+            'time_minutes': 7,
+            'price': 400
+        }
+
+        res = self.client.post(RECIPE_ROUTE, payload)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+    def test_create_recipe_with_tags(self):
+        tag1 = sample_tag(user=self.user, name='tag1')
+        tag2 = sample_tag(user=self.user, name='tag2')
+
+        payload = {
+            'title': 'Sample recipe title',
+            'time_minutes': 7,
+            'price': 400,
+            'tags': [tag1.id, tag2.id]
+        }
+        res = self.client.post(RECIPE_ROUTE, payload)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipe = Recipe.objects.get(id=res.data['id'])
+        tags = recipe.tags.all()
+        self.assertEqual(tags.count(), 2)
+        self.assertIn(tag1, tags)
+        self.assertIn(tag2, tags)
+
+    def test_create_recipe_with_ingredients(self):
+        ingredient1 = sample_ingredient(user=self.user, name='ingredient1')
+        ingredient2 = sample_ingredient(user=self.user, name='ingredient2')
+
+        payload = {
+            'title': 'Sample recipe title',
+            'time_minutes': 7,
+            'price': 400,
+            'ingredients': [ingredient1.id, ingredient2.id]
+        }
+        res = self.client.post(RECIPE_ROUTE, payload)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipe = Recipe.objects.get(id=res.data['id'])
+        ingredients = recipe.ingredients.all()
+        self.assertEqual(ingredients.count(), 2)
+        self.assertIn(ingredient1, ingredients)
+        self.assertIn(ingredient2, ingredients)
