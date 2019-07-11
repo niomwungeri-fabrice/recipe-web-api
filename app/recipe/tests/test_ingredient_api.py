@@ -69,3 +69,25 @@ class PrivateIngredientApiTests(TestCase):
         payload = {"name": " "}
         res = self.client.post(INGREDIENT_ROUTE, payload)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    # def test_retrieve_tags_by_ingredients(self):
+    #     ingredient1 = Ingredient.objects.create(
+    #         user=self.user, name='Ingredient 1')
+    #     ingredient2 = Ingredient.objects.create(
+    #         user=self.user, name='Ingredient 2')
+
+    #     recipe = Recipe.objects.create(
+    #         title='Recipe test title',
+    #         time_minutes=90,
+    #         price=899,
+    #         user=self.user
+    #     )
+    #     recipe.ingredients.add(ingredient1)
+
+    #     res = self.client.get(INGREDIENT_ROUTE, {'assigned_only': 1})
+
+    #     serializer1 = IngredientSerializer(ingredient1)
+    #     serializer2 = IngredientSerializer(ingredient2)
+
+    #     self.assertIn(serializer1.data, res.data)
+    #     self.assertNotIn(serializer2.data, res.data)

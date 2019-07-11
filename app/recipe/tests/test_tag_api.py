@@ -69,3 +69,23 @@ class PrivateTagsApiTests(TestCase):
         payload = {"name": " "}
         res = self.client.post(TAGS_ROUTE, payload)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    # def test_retrieve_tags_by_tags(self):
+    #     tag1 = Tag.objects.create(user=self.user, name='Tag 1')
+    #     tag2 = Tag.objects.create(user=self.user, name='Tag 2')
+
+    #     recipe = Recipe.objects.create(
+    #         title='Recipe test title',
+    #         time_minutes=90,
+    #         price=899,
+    #         user=self.user
+    #     )
+    #     recipe.tags.add(tag1)
+
+    #     res = self.client.get(TAGS_ROUTE, {'assigned_only': 1})
+
+    #     serializer1 = TagSerializer(tag1)
+    #     serializer2 = TagSerializer(tag2)
+
+    #     self.assertIn(serializer1.data, res.data)
+    #     self.assertNotIn(serializer2.data, res.data)
