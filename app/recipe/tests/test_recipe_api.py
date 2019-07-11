@@ -212,3 +212,48 @@ class RecipeImageUploadTests(TestCase):
         res = self.client.post(
             url, {'image': 'invalid_image'}, format='multipart')
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_filtering_recipe_by_tags(self):
+        recipe1 = sample_recipe(user=self.user, title='Title 1')
+        tag1 = sample_tag(user=self.user, name='tag 1')
+        recipe1.tags.add(tag1)
+
+        recipe2 = sample_recipe(user=self.user, title='Title 2')
+        tag2 = sample_tag(user=self.user, name='tag 2')
+        recipe2.tags.add(tag2)
+
+        recipe3 = sample_recipe(user=self.user, title='Title 3')
+
+        res = self.client.get(RECIPE_ROUTE, {'tags': f'{tag1.id},{tag2.id}'})
+
+        serializer1 = RecipeSerializer(recipe1)
+        serializer2 = RecipeSerializer(recipe2)
+        serializer3 = RecipeSerializer(recipe3)
+
+        self.assertIn(serializer1.data, res.data)
+        self.assertIn(serializer2.data, res.data)
+        self.assertNotIn(serializer3.data, res.data)
+
+    def test_filtering_recipe_by_ingredients(self):
+        recipe1 = sample_recipe(user=self.user, title='Title 1')
+        ingredient1 = sample_ingredient(user=self.user, name='ingredient 1')
+        recipe1.ingredients.add(ingredient1)
+
+        recipe2 = sample_recipe(user=self.user, title='Title 2')
+        ingredient2 = sample_ingredient(user=self.user, name='ingredient 2')
+        recipe2.ingredients.add(ingredient2)
+
+        recipe3 = sample_recipe(user=self.user, title='Title 3')
+
+        res = self.client.get(
+            RECIPE_ROUTE, {
+                'ingredients': f'{ingredient1.id},{ingredient2.id}'
+            })
+
+        serializer1 = RecipeSerializer(recipe1)
+        serializer2 = RecipeSerializer(recipe2)
+        serializer3 = RecipeSerializer(recipe3)
+
+        self.assertIn(serializer1.data, res.data)
+        self.assertIn(serializer2.data, res.data)
+        self.assertNotIn(serializer3.data, res.data)
